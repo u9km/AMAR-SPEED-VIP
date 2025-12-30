@@ -1,33 +1,23 @@
-name: Sovereign Build V200
-
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-  workflow_dispatch:
-
+name: build_sovereign_v41_final
+on: [push]
 jobs:
   build:
     runs-on: macos-latest
-
     steps:
-    - name: Checkout Project
-      uses: actions/checkout@v4
-
-    - name: Setup Theos
-      run: |
-        export THEOS=~/theos
-        git clone --recursive https://github.com/theos/theos.git $THEOS
-        curl -L https://github.com/theos/sdks/raw/master/iPhoneOS14.5.sdk.tar.xz | tar -xf - -C $THEOS/sdks
-
-    - name: Build Sovereign Security
-      run: |
-        export THEOS=~/theos
-        make package FINALPACKAGE=1
-
-    - name: Upload Sovereign Artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: Sovereign-Build-V200
-        path: packages/*.deb
+      - uses: actions/checkout@v4
+      - name: Setup Theos
+        run: git clone --recursive https://github.com/theos/theos.git ~/theos
+      - name: Install Dependencies
+        run: brew install ldid # حل مشكلة command not found
+      - name: Build Sovereign V41
+        run: |
+          export THEOS=~/theos
+          make package
+      - name: Upload Sovereign Artifacts
+        uses: actions/upload-artifact@v4 # حل مشكلة deprecated version
+        with:
+          name: SovereignV41-Full-Package
+          path: |
+            packages/*.deb
+            .theos/obj/debug/*.dylib
+            .theos/obj/*.dylib
